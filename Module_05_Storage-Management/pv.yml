@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume                # Déclare une ressource de type Volume Persistant (PV)
+metadata:
+  name: pv                            # Nom du PersistentVolume
+  labels:
+    type: local                       # Étiquette personnalisée (facultative) : utile pour filtrer ou associer
+spec:
+  storageClassName: manual            # Nom de la classe de stockage (doit correspondre à celle du PVC)
+  capacity:
+    storage: 1Gi                      # Capacité de stockage allouée pour ce volume (1 gigaoctet)
+  accessModes:
+    - ReadWriteOnce                   # Mode d'accès autorisé :
+                                      # - ReadWriteOnce : un seul nœud peut monter le volume en lecture/écriture
+  hostPath:
+    path: "/data-pv"                  # Chemin local sur le nœud où les données sont réellement stockées
+                                      # ⚠️ Utilisé principalement pour les environnements de test comme Minikube

@@ -1,0 +1,11 @@
+apiVersion: v1  # Version de l'API utilisée pour la ressource PVC
+kind: PersistentVolumeClaim  # Type de ressource : une demande de volume persistant
+metadata:
+  name: pvc  # Nom de la réclamation, utilisé pour la lier dans un Pod
+spec:
+  storageClassName: manual  # Nom de la StorageClass ciblée (doit matcher un PV existant)
+  accessModes:
+    - ReadWriteOnce  # Mode d'accès : un seul nœud peut monter le volume en lecture/écriture
+  resources:
+    requests:
+      storage: 100Mi  # Quantité de stockage demandée (100 méga-octets)

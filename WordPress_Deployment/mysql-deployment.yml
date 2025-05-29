@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-mysql                 # Nom du Deployment
+  labels:
+    app: wordpress               # Label pour identifier l'application
+  namespace: wordpress           # Namespace Kubernetes où sera déployé ce composant
+spec:
+  replicas: 1                    # Nombre de pods MySQL à faire tourner
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql                # Sélectionne les pods ayant ces labels
+  strategy:
+    type: Recreate               # Stratégie de redéploiement : supprimer l'ancien pod avant de créer le nouveau
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - name: mysql              # Nom du conteneur
+        image: mysql:8.0        # Image Docker de MySQL utilisée
+        env:                     # Déclaration des variables d'environnement
+        - name: MYSQL_DATABASE
+          value: wordpress       # Nom de la base de données initiale
+        - name: MYSQL_USER
+          value: cfk             # Utilisateur MySQL
+        - name: MYSQL_PASSWORD   # Mot de passe de l'utilisateur MySQL, issu du Secret
+          valueFrom:
+            secretKeyRef:
+              name: app-wordpress-secret     # Nom du Secret Kubernetes
+              key: mysql_password         # Clé dans le Secret
+        - name: MYSQL_RANDOM_ROOT_PASSWORD   # Mot de passe root aléatoire, issu du Secret
+          valueFrom:
+            secretKeyRef:
+              name: app-wordpress-secret
+              key: mysql_random_root_password
+        ports:
+        - containerPort: 3306     # Port exposé pour accéder à MySQL
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql  # Emplacement où les données seront stockées dans le conteneur
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: pvc-mysql   # PVC (volume persistant) pour stocker les données MySQL
+
+
+      # Pour utiliser un chemin local sur le nœud, décommentez et commentez la section PVC ci-dessus
+      # - name: mysql-persistent-storage
+      #   hostPath:
+      #     path: /data/mysql          # Chemin local sur le nœud (non recommandé en production)

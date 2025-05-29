@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-volume               # Nom du Pod
+spec:
+  containers:
+  - image: mysql                   # Image officielle MySQL (par défaut dernière stable)
+    name: mysql                   # Nom du conteneur dans le Pod
+    volumeMounts:
+    - mountPath: /var/lib/mysql   # Point de montage dans le conteneur où MySQL stocke ses données
+      name: mysql-data            # Référence au volume défini ci-dessous
+    env:
+      - name: MYSQL_ROOT_PASSWORD  # Mot de passe du compte root MySQL (obligatoire)
+        value: password
+      - name: MYSQL_DATABASE       # Nom de la base de données à créer au démarrage
+        value: cfk
+      - name: MYSQL_USER           # Nom de l'utilisateur MySQL à créer
+        value: cfk
+      - name: MYSQL_PASSWORD       # Mot de passe de cet utilisateur
+        value: cfk
+  volumes:
+  - name: mysql-data              # Nom du volume, référencé dans volumeMounts
+    hostPath:                    # Utilisation d'un volume de type hostPath (répertoire local sur le nœud)
+      path: /data-volume          # Chemin sur le nœud où seront stockées les données MySQL
+      type: DirectoryOrCreate     # Créera le dossier s'il n'existe pas

@@ -1,0 +1,21 @@
+apiVersion: v1                      # Version de l’API Kubernetes utilisée pour cette ressource
+kind: Service                       # Type de ressource : un Service (pour exposer un ou plusieurs Pods)
+
+metadata:
+  labels:
+    app: mysql                      # Label affecté au Service (utile pour l’identification, pas pour la sélection de Pods)
+  name: mysql                       # Nom du Service (utilisé pour y accéder dans le cluster, ex: mysql:3306)
+  namespace: wordpress              # Le Service sera créé dans le namespace 'wordpress'
+
+spec:
+  ports:
+  - name: 3306-3306                 # Nom symbolique du port (facultatif, peut servir pour certaines configurations)
+    port: 3306                      # Port d'entrée du Service (les autres Pods se connecteront à ce port)
+    protocol: TCP                   # Protocole utilisé (MySQL utilise TCP)
+    targetPort: 3306               # Port sur lequel le conteneur écoute réellement (dans les Pods)
+
+  selector:
+    app: wordpress                  # Le Service ciblera uniquement les Pods ayant ces deux labels...
+    tier: mysql                     # ...c’est-à-dire : app=wordpress et tier=mysql
+
+  type: ClusterIP                   # Type de Service : ClusterIP (accessible uniquement à l’intérieur du cluster)

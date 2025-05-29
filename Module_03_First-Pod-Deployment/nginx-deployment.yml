@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cfk-deployment-nginx
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: cfk-nginx
+  template:
+    metadata:
+      labels:
+        app: cfk-nginx
+    spec:
+      containers:
+      - name: cfk-nginx-container
+        image: nginx:1.18.0
+        ports:
+        - containerPort: 80

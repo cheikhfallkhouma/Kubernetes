@@ -1,0 +1,46 @@
+apiVersion: apps/v1                        # Version de l'API pour les Deployments (stable depuis apps/v1)
+kind: Deployment                           # Type de ressource : un Deployment (gestion des Pods réplicables)
+metadata:
+  name: wordpress                          # Nom du Deployment
+  labels:
+    app: wordpress                         # Label d'identification (utile pour le suivi, mais pas pour le selector)
+  namespace: wordpress                     # Le Deployment sera déployé dans le namespace 'wordpress'
+spec:
+  replicas: 1                              # Nombre de Pods à exécuter (ici, 1 instance de WordPress)
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend                       # Le Deployment gère les Pods avec ces deux labels
+  strategy:
+    type: Recreate                         # Politique de mise à jour : recrée les Pods (utile si conflits de volume, ex: hostPath)
+  template:                                # Gabarit des Pods gérés par ce Deployment
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend                     # Labels appliqués aux Pods créés (doivent correspondre au selector)
+    spec:
+      containers:
+      - image: wordpress:latest            # Image Docker utilisée pour le conteneur (WordPress dernière version)
+        name: wordpress                    # Nom du conteneur dans le Pod
+        env:
+        - name: WORDPRESS_DB_USER
+          value: cfk                      # Utilisateur MySQL que WordPress utilisera
+        - name: WORDPRESS_DB_NAME
+          value: wordpress                 # Nom de la base de données MySQL
+        - name: WORDPRESS_DB_HOST
+          value: mysql                     # Adresse du service MySQL (doit correspondre au nom du Service)
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:                 # Référence à une Secret Kubernetes pour cacher le mot de passe
+              name: app-wordpress-secret  # Nom de la Secret
+              key: wordpress_db_password  # Clé dans la Secret
+        ports:
+        - containerPort: 80                # Port exposé par le conteneur (serveur HTTP de WordPress)
+          name: wordpress                  # Nom symbolique du port (facultatif)
+        volumeMounts:
+        - name: wp-persistent-storage
+          mountPath: /var/www/html         # Répertoire où WordPress stocke son contenu (uploads, plugins...)
+      volumes:
+      - name: wp-persistent-storage
+        hostPath:
+          path: /data/wordpress            # Stockage local sur le nœud minikube (non portable, pour dev uniquement)

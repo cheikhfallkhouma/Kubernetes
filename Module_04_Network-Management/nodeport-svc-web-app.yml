@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-svc-nodeport
+  namespace: production
+spec:
+  selector:
+    name: web-app  # Ce label doit correspondre à celui défini dans tes Pods
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80            # Port du service (exposé à l'intérieur du cluster)
+    targetPort: 8080    # Port dans le conteneur (doit matcher containerPort)
+    nodePort: 30008     # Port exposé sur les nœuds du cluster
+  type: NodePort
